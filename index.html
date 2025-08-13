@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VideoRate Pro - Secure YouTube Video Rating Platform</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+</head>
+<body>
+    <!-- Security Banner -->
+    <div class="security-banner">
+        <div class="container">
+            <div class="security-info">
+                <span class="security-icon">🔒</span>
+                <span>Secure platform with end-to-end encryption and privacy-first design</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <h1 class="app-title">VideoRate Pro</h1>
+                <p class="app-subtitle">Secure YouTube video rating with privacy controls</p>
+            </div>
+            <div class="user-section">
+                <!-- Signed out state -->
+                <div id="signed-out-section" class="auth-section">
+                    <div id="g_id_onload" 
+                         data-client_id="your-client-id.googleusercontent.com"
+                         data-context="signin"
+                         data-ux_mode="popup"
+                         data-callback="handleCredentialResponse"
+                         data-auto_prompt="false">
+                    </div>
+                    <div class="g_id_signin" 
+                         data-type="standard"
+                         data-shape="rectangular"
+                         data-theme="outline"
+                         data-text="signin_with"
+                         data-size="large"
+                         data-logo_alignment="left">
+                    </div>
+                    <p class="auth-note">Sign in securely with your Google account</p>
+                </div>
+                
+                <!-- Signed in state -->
+                <div id="signed-in-section" class="user-profile hidden">
+                    <div class="user-info">
+                        <img id="user-avatar" src="" alt="User avatar" class="user-avatar">
+                        <div class="user-details">
+                            <div class="user-name" id="user-name"></div>
+                            <div class="user-email" id="user-email"></div>
+                        </div>
+                    </div>
+                    <button id="sign-out-btn" class="btn btn--outline btn--sm">Sign Out</button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Navigation Tabs -->
+        <nav class="tab-navigation">
+            <button class="tab-btn active" data-tab="videos">
+                <span>🔍</span>
+                Search & Rate
+            </button>
+            <button class="tab-btn" data-tab="history" id="history-tab">
+                <span>📚</span>
+                Watch History
+            </button>
+            <button class="tab-btn" data-tab="ratings" id="ratings-tab">
+                <span>⭐</span>
+                My Ratings
+            </button>
+            <button class="tab-btn" data-tab="privacy" id="privacy-tab">
+                <span>🛡️</span>
+                Privacy & Security
+            </button>
+            <button class="tab-btn" data-tab="recommendations" id="recommendations-tab">
+                <span>🤖</span>
+                Recommendations
+            </button>
+        </nav>
+
+        <!-- Tab Content -->
+        <main class="tab-content">
+            <!-- Search & Rate Videos Tab -->
+            <div id="videos-tab" class="tab-panel active">
+                <div class="search-section">
+                    <div class="search-header">
+                        <h2>Search YouTube Videos</h2>
+                        <p class="section-description">Search and rate YouTube videos securely</p>
+                    </div>
+                    <div class="search-bar">
+                        <input type="text" id="search-input" class="form-control search-input" placeholder="Search for YouTube videos..." maxlength="100">
+                        <button id="search-btn" class="btn btn--primary">Search</button>
+                    </div>
+                    <div class="filter-bar">
+                        <select id="category-filter" class="form-control category-select">
+                            <option value="">All Categories</option>
+                            <option value="Music">Music</option>
+                            <option value="Education">Education</option>
+                            <option value="Entertainment">Entertainment</option>
+                            <option value="Technology">Technology</option>
+                            <option value="Gaming">Gaming</option>
+                            <option value="Cooking">Cooking</option>
+                            <option value="Travel">Travel</option>
+                            <option value="Documentary">Documentary</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div id="videos-grid" class="videos-grid">
+                    <!-- Video cards will be populated by JavaScript -->
+                </div>
+            </div>
+
+            <!-- Watch History Tab -->
+            <div id="history-tab-panel" class="tab-panel">
+                <div class="auth-required hidden" id="history-auth-required">
+                    <div class="auth-prompt">
+                        <h2>🔒 Authentication Required</h2>
+                        <p>Please sign in with your Google account to import watch history</p>
+                    </div>
+                </div>
+                
+                <div id="history-content" class="hidden">
+                    <div class="history-header">
+                        <h2>Import Watch History</h2>
+                        <p class="section-description">Import your YouTube watch history from Google Takeout</p>
+                    </div>
+                    
+                    <div class="import-options">
+                        <div class="import-card">
+                            <h3>📦 Google Takeout Import</h3>
+                            <p>Upload your YouTube watch history JSON file from Google Takeout</p>
+                            <div class="file-upload-area">
+                                <input type="file" id="history-file" accept=".json" class="file-input hidden">
+                                <label for="history-file" class="file-upload-label">
+                                    <span class="upload-icon">📁</span>
+                                    <span class="upload-text">Choose JSON file</span>
+                                </label>
+                                <div class="upload-progress hidden" id="upload-progress">
+                                    <div class="progress-bar">
+                                        <div class="progress-fill"></div>
+                                    </div>
+                                    <span class="progress-text">Processing...</span>
+                                </div>
+                            </div>
+                            <div class="import-help">
+                                <details>
+                                    <summary>How to get your YouTube data</summary>
+                                    <ol>
+                                        <li>Go to <a href="https://takeout.google.com" target="_blank">Google Takeout</a></li>
+                                        <li>Select "YouTube and YouTube Music"</li>
+                                        <li>Choose "history" data</li>
+                                        <li>Download and extract the JSON file</li>
+                                        <li>Upload the "watch-history.json" file here</li>
+                                    </ol>
+                                </details>
+                            </div>
+                        </div>
+                        
+                        <div class="import-card">
+                            <h3>🔗 Manual URL Import</h3>
+                            <p>Paste YouTube URLs to add videos for rating</p>
+                            <textarea id="manual-urls" class="form-control" placeholder="Paste YouTube URLs (one per line)...
+https://www.youtube.com/watch?v=dQw4w9WgXcQ
+https://www.youtube.com/watch?v=9bZkp7q19f0" rows="5"></textarea>
+                            <button id="import-urls-btn" class="btn btn--secondary">Import URLs</button>
+                        </div>
+                    </div>
+                    
+                    <div id="imported-history" class="history-list">
+                        <!-- Imported history will be shown here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- My Ratings Tab -->
+            <div id="ratings-tab-panel" class="tab-panel">
+                <div class="auth-required hidden" id="ratings-auth-required">
+                    <div class="auth-prompt">
+                        <h2>🔒 Authentication Required</h2>
+                        <p>Please sign in with your Google account to view your ratings</p>
+                    </div>
+                </div>
+                
+                <div id="ratings-content" class="hidden">
+                    <div class="ratings-header">
+                        <h2>My Video Ratings</h2>
+                        <p class="section-description">Your personal rating history and statistics</p>
+                        <div class="rating-stats">
+                            <div class="stat">
+                                <span class="stat-number" id="user-total-ratings">0</span>
+                                <span class="stat-label">Total Ratings</span>
+                            </div>
+                            <div class="stat">
+                                <span class="stat-number" id="user-avg-rating">0.0</span>
+                                <span class="stat-label">Average Rating</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="user-ratings-list" class="ratings-list">
+                        <!-- User ratings will be populated by JavaScript -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Privacy & Security Tab -->
+            <div id="privacy-tab-panel" class="tab-panel">
+                <div class="auth-required hidden" id="privacy-auth-required">
+                    <div class="auth-prompt">
+                        <h2>🔒 Authentication Required</h2>
+                        <p>Please sign in with your Google account to manage privacy settings</p>
+                    </div>
+                </div>
+                
+                <div id="privacy-content" class="hidden">
+                    <div class="privacy-header">
+                        <h2>🛡️ Privacy & Security Dashboard</h2>
+                        <p class="section-description">Manage your data, privacy settings, and security preferences</p>
+                    </div>
+
+                    <div class="privacy-sections">
+                        <!-- Security Features -->
+                        <div class="privacy-card">
+                            <h3>🔒 Security Features</h3>
+                            <div class="security-features">
+                                <div class="security-item">
+                                    <span class="security-status active">✓</span>
+                                    <div class="security-info">
+                                        <strong>Google OAuth2 Authentication</strong>
+                                        <p>Secure sign-in using your existing Google account</p>
+                                    </div>
+                                </div>
+                                <div class="security-item">
+                                    <span class="security-status active">✓</span>
+                                    <div class="security-info">
+                                        <strong>Encrypted Data Storage</strong>
+                                        <p>All user data encrypted both in transit and at rest</p>
+                                    </div>
+                                </div>
+                                <div class="security-item">
+                                    <span class="security-status active">✓</span>
+                                    <div class="security-info">
+                                        <strong>No Password Storage</strong>
+                                        <p>We never see or store your password - handled by Google</p>
+                                    </div>
+                                </div>
+                                <div class="security-item">
+                                    <span class="security-status active">✓</span>
+                                    <div class="security-info">
+                                        <strong>Session Security</strong>
+                                        <p>Secure session management with automatic timeout</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Data Collection Settings -->
+                        <div class="privacy-card">
+                            <h3>📊 Data Collection Preferences</h3>
+                            <div class="privacy-settings">
+                                <div class="privacy-setting">
+                                    <div class="setting-info">
+                                        <strong>Essential Functionality</strong>
+                                        <p>Required for basic app functionality</p>
+                                    </div>
+                                    <input type="checkbox" id="essential" checked disabled class="privacy-checkbox">
+                                    <label for="essential" class="privacy-label required">Required</label>
+                                </div>
+                                <div class="privacy-setting">
+                                    <div class="setting-info">
+                                        <strong>Analytics & Performance</strong>
+                                        <p>Help us improve the app experience</p>
+                                    </div>
+                                    <input type="checkbox" id="analytics" checked class="privacy-checkbox">
+                                    <label for="analytics" class="privacy-label"></label>
+                                </div>
+                                <div class="privacy-setting">
+                                    <div class="setting-info">
+                                        <strong>Personalized Recommendations</strong>
+                                        <p>Use your ratings to suggest similar content</p>
+                                    </div>
+                                    <input type="checkbox" id="recommendations" checked class="privacy-checkbox">
+                                    <label for="recommendations" class="privacy-label"></label>
+                                </div>
+                                <div class="privacy-setting">
+                                    <div class="setting-info">
+                                        <strong>Marketing Communications</strong>
+                                        <p>Receive updates about new features</p>
+                                    </div>
+                                    <input type="checkbox" id="marketing" class="privacy-checkbox">
+                                    <label for="marketing" class="privacy-label"></label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Data Management -->
+                        <div class="privacy-card">
+                            <h3>🗂️ Data Management</h3>
+                            <div class="data-actions">
+                                <button id="export-data-btn" class="btn btn--outline">📥 Export My Data</button>
+                                <button id="delete-ratings-btn" class="btn btn--outline">🗑️ Delete All Ratings</button>
+                                <button id="delete-account-btn" class="btn btn--outline danger">⚠️ Delete Account</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recommendations Tab -->
+            <div id="recommendations-tab-panel" class="tab-panel">
+                <div class="auth-required hidden" id="recommendations-auth-required">
+                    <div class="auth-prompt">
+                        <h2>🔒 Authentication Required</h2>
+                        <p>Please sign in with your Google account to view personalized recommendations</p>
+                    </div>
+                </div>
+
+                <div id="recommendations-content" class="recommendations-placeholder">
+                    <div class="placeholder-content">
+                        <h2>🤖 AI-Powered Recommendations</h2>
+                        <p>Our collaborative filtering algorithm will recommend videos based on users with similar preferences.</p>
+                        <div class="feature-list">
+                            <div class="feature-item">
+                                <span class="feature-icon">🎯</span>
+                                <div>
+                                    <h4>Personalized Suggestions</h4>
+                                    <p>Videos tailored to your taste based on your rating history</p>
+                                </div>
+                            </div>
+                            <div class="feature-item">
+                                <span class="feature-icon">👥</span>
+                                <div>
+                                    <h4>Similar User Discovery</h4>
+                                    <p>Find users with similar preferences and discover their favorites</p>
+                                </div>
+                            </div>
+                            <div class="feature-item">
+                                <span class="feature-icon">📈</span>
+                                <div>
+                                    <h4>Trend Analysis</h4>
+                                    <p>Discover trending content in your preferred categories</p>
+                                </div>
+                            </div>
+                            <div class="feature-item">
+                                <span class="feature-icon">🔒</span>
+                                <div>
+                                    <h4>Privacy Preserved</h4>
+                                    <p>Recommendations without compromising your personal data</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="coming-soon">
+                            <span class="status status--info">Coming Soon - Building with Privacy First</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Video Rating Modal -->
+    <div id="rating-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modal-video-title">Rate this Video</h3>
+                <button class="modal-close" id="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="video-info">
+                    <img id="modal-video-thumbnail" src="" alt="Video thumbnail" class="video-thumbnail">
+                    <div class="video-details">
+                        <p id="modal-video-channel" class="video-channel"></p>
+                        <p id="modal-video-duration" class="video-duration"></p>
+                        <p id="modal-current-rating" class="current-rating"></p>
+                    </div>
+                </div>
+                <div class="rating-section">
+                    <label class="form-label">Your Rating:</label>
+                    <div class="rating-input">
+                        <input type="range" id="rating-slider" class="rating-slider" min="1" max="10" value="5">
+                        <div class="rating-display">
+                            <span id="rating-value">5</span>/10
+                            <div class="stars" id="rating-stars"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="submit-rating" class="btn btn--primary">Submit Rating</button>
+                <button id="cancel-rating" class="btn btn--secondary">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Consent Modal - Fixed to be hidden by default -->
+    <div id="consent-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>🛡️ Privacy & Data Consent</h3>
+            </div>
+            <div class="modal-body">
+                <div class="consent-content">
+                    <p>Welcome to VideoRate Pro! We prioritize your privacy and data security.</p>
+                    <h4>What we collect:</h4>
+                    <ul>
+                        <li>Your Google profile information (name, email, profile picture)</li>
+                        <li>Video ratings and preferences</li>
+                        <li>Basic usage analytics to improve our service</li>
+                    </ul>
+                    <h4>What we don't collect:</h4>
+                    <ul>
+                        <li>Your YouTube passwords or authentication tokens</li>
+                        <li>Personal data beyond what's necessary for functionality</li>
+                        <li>Tracking data across other websites</li>
+                    </ul>
+                    <div class="consent-options">
+                        <label class="consent-checkbox">
+                            <input type="checkbox" id="consent-required" required>
+                            I agree to the essential data processing (required)
+                        </label>
+                        <label class="consent-checkbox">
+                            <input type="checkbox" id="consent-analytics" checked>
+                            I agree to optional analytics to improve the service
+                        </label>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="accept-consent" class="btn btn--primary" disabled>Accept & Continue</button>
+                <button id="decline-consent" class="btn btn--outline">Decline</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
